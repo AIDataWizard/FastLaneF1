@@ -384,7 +384,9 @@ st.plotly_chart(fig1, width="stretch")
 # ---------------------------------------------
 # PLOT 2 — TELEMETRY COMPARISON (FULL MODE)
 # ---------------------------------------------
-if not light_mode:
+if light_mode:
+    st.info("🕹️ Fast Mode active — showing only lap time analysis (telemetry skipped).")
+else:
     telemetry = pd.DataFrame()
     for drv in drivers:
         try:
@@ -393,17 +395,26 @@ if not light_mode:
             drv_tel["Driver"] = drv
             telemetry = pd.concat([telemetry, drv_tel])
         except Exception:
-            st.warning(f"⚠️ Telemetry missing for {drv}")
+            st.warning(f"⚠️ Some telemetry missing for {drv}")
 
+    # Only display charts if telemetry exists
     if not telemetry.empty:
+        # Speed vs Distance chart
         fig2 = px.line(
             telemetry, x="Distance", y="Speed", color="Driver",
             title=f"Speed vs Distance – Fastest Lap ({gp} {year})"
         )
-        fig2.update_layout(xaxis_title="Distance (m)", yaxis_title="Speed (km/h)", template="plotly_dark")
+        fig2.update_layout(
+            xaxis_title="Distance (m)",
+            yaxis_title="Speed (km/h)",
+            template="plotly_dark",
+            paper_bgcolor="#0E1117",
+            plot_bgcolor="#0E1117",
+            font=dict(color="white")
+        )
         st.plotly_chart(fig2, width="stretch")
 
-        # Delta comparison if 2 drivers
+        # Delta chart only if 2 drivers selected
         if len(drivers) == 2:
             d1, d2 = drivers
             st.write(f"### Delta-Time Analysis: {d2} vs {d1}")
@@ -412,27 +423,32 @@ if not light_mode:
             if not tel1.empty and not tel2.empty:
                 common_dist = np.linspace(
                     min(tel1["Distance"].min(), tel2["Distance"].min()),
-                    max(tel1["Distance"].max(), tel2["Distance"].max()), 2000
+                    max(tel1["Distance"].max(), tel2["Distance"].max()),
+                    2000
                 )
                 t1 = np.interp(common_dist, tel1["Distance"], tel1["Time"].dt.total_seconds())
                 t2 = np.interp(common_dist, tel2["Distance"], tel2["Time"].dt.total_seconds())
                 delta = t2 - t1
                 fig3 = go.Figure()
-                fig3.add_trace(go.Scatter(x=common_dist, y=delta,
-                                          mode="lines",
-                                          name=f"Δ Time ({d2} - {d1})",
-                                          line=dict(width=2, color="orange")))
+                fig3.add_trace(go.Scatter(
+                    x=common_dist, y=delta, mode="lines",
+                    name=f"Δ Time ({d2} - {d1})",
+                    line=dict(width=2, color="orange")
+                ))
                 fig3.add_hline(y=0, line=dict(color="white", width=1, dash="dash"))
-                fig3.update_layout(title=f"Delta Time vs Distance – {gp} {year}",
-                                   xaxis_title="Distance (m)",
-                                   yaxis_title="Δ Time (s)",
-                                   template="plotly_dark",
-                                   hovermode="x unified")
+                fig3.update_layout(
+                    title=f"Delta Time vs Distance – {gp} {year}",
+                    xaxis_title="Distance (m)",
+                    yaxis_title="Δ Time (s)",
+                    template="plotly_dark",
+                    paper_bgcolor="#0E1117",
+                    plot_bgcolor="#0E1117",
+                    font=dict(color="white"),
+                    hovermode="x unified"
+                )
                 st.plotly_chart(fig3, width="stretch")
     else:
-        st.info("ℹ️ No telemetry data available for this session or mode.")
-else:
-    st.info("ℹ️ Fast Mode active — showing only lap time summary.")
+        st.info("ℹ️ Telemetry data not available for this session.")
 
 # ---------------------------------------------
 # FOOTER
