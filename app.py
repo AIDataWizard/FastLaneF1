@@ -103,12 +103,6 @@ warnings.filterwarnings("ignore")
 # PAGE CONFIG
 # ---------------------------------------------
 st.set_page_config(page_title="FastLaneF1 Analytics", layout="wide")
-# --- Cache and data loading helper ---
-@st.cache_data(show_spinner=False)
-def load_f1_session(year, gp, session_type):
-    session = fastf1.get_session(year, gp, session_type)
-    session.load()
-    return session
 st.title("🏎️ FastLaneF1 – Live F1 Telemetry & Race Analytics")
 
 # Enable cache (stored temporarily on Render)
@@ -117,31 +111,43 @@ os.makedirs("cache", exist_ok=True)
 fastf1.Cache.enable_cache("cache")
 
 # ---------------------------------------------
+# CACHED DATA LOADER
+# ---------------------------------------------
+@st.cache_data(show_spinner=False)
+def load_f1_session(year, gp, session_type):
+    """Fetch and cache F1 session data from FastF1"""
+    session = fastf1.get_session(year, gp, session_type)
+    session.load()
+    return session
+
+# ---------------------------------------------
 # SIDEBAR INPUTS
 # ---------------------------------------------
 st.sidebar.header("Session Selection")
 
 year = st.sidebar.selectbox("Year", [2021, 2022, 2023, 2024])
+
 gp = st.sidebar.selectbox(
     "Grand Prix",
     [
         "Bahrain", "Saudi Arabia", "Australia", "Azerbaijan", "Miami", "Monaco",
         "Spain", "Canada", "Austria", "Great Britain", "Hungary", "Belgium",
         "Netherlands", "Italy", "Singapore", "Japan", "Qatar", "United States",
-        "Mexico", "Brazil", "Las Vegas", "Abu Dhabi"
+        "Mexico", "Brazil", "Las Vegas", "Abu Dhabi",
     ],
-    index=19  # Default = Brazil
+    index=8  # Default = Austria for faster startup
 )
+
 session_type = st.sidebar.selectbox("Session", ["Race", "Qualifying", "Sprint"])
 drivers = st.sidebar.multiselect("Drivers", ["VER", "NOR", "HAM", "LEC", "PER", "SAI"], default=["VER", "NOR"])
 
 st.sidebar.write("---")
 
 # ---------------------------------------------
-# LOAD FASTF1 SESSION
+# LOAD FASTF1 SESSION WITH SPINNER + CACHE
 # ---------------------------------------------
 st.write(f"### Loading {session_type} data for {gp} {year}... ⏳")
-# --- Load session with spinner and caching ---
+
 try:
     with st.spinner(f"🔄 Fetching {gp} {session_type} data for {year}... this may take a minute ⏱️"):
         session = load_f1_session(year, gp, session_type)
