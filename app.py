@@ -104,6 +104,8 @@ st.set_page_config(page_title="FastLaneF1 Analytics", layout="wide")
 st.title("🏎️ FastLaneF1 – Live F1 Telemetry & Race Analytics")
 
 # Enable cache (stored temporarily on Render)
+import os
+os.makedirs("cache", exist_ok=True)
 fastf1.Cache.enable_cache("cache")
 
 # ---------------------------------------------
