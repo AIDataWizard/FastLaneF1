@@ -96,11 +96,19 @@ import plotly.express as px
 import plotly.graph_objects as go
 import fastf1
 from fastf1 import plotting
+import warnings
+warnings.filterwarnings("ignore")
 
 # ---------------------------------------------
 # PAGE CONFIG
 # ---------------------------------------------
 st.set_page_config(page_title="FastLaneF1 Analytics", layout="wide")
+# --- Cache and data loading helper ---
+@st.cache_data(show_spinner=False)
+def load_f1_session(year, gp, session_type):
+    session = fastf1.get_session(year, gp, session_type)
+    session.load()
+    return session
 st.title("🏎️ FastLaneF1 – Live F1 Telemetry & Race Analytics")
 
 # Enable cache (stored temporarily on Render)
@@ -133,13 +141,15 @@ st.sidebar.write("---")
 # LOAD FASTF1 SESSION
 # ---------------------------------------------
 st.write(f"### Loading {session_type} data for {gp} {year}... ⏳")
+# --- Load session with spinner and caching ---
 try:
-    session = fastf1.get_session(year, gp, session_type)
-    session.load()
+    with st.spinner(f"🔄 Fetching {gp} {session_type} data for {year}... this may take a minute ⏱️"):
+        session = load_f1_session(year, gp, session_type)
     st.success(f"✅ Loaded {gp} {session_type} ({year}) successfully")
 except Exception as e:
     st.error(f"❌ Could not load session data: {e}")
     st.stop()
+
 
 # ---------------------------------------------
 # LAP TIME COMPARISON
@@ -237,5 +247,5 @@ else:
 # ---------------------------------------------
 st.write("---")
 st.markdown(
-    "Built with ❤️ by **Shraddha Thanekar** | Powered by [FastF1](https://docs.fastf1.dev/) and Streamlit 🚀"
+    "Built with ❤️ by **WeAreChecking** | Powered by [FastF1](https://docs.fastf1.dev/) and Streamlit 🚀"
 )
