@@ -144,19 +144,27 @@ drivers = st.sidebar.multiselect("Drivers", ["VER", "NOR", "HAM", "LEC", "PER", 
 st.sidebar.write("---")
 
 # ---------------------------------------------
-# LOAD FASTF1 SESSION WITH SPINNER + CACHE
+# LOAD FASTF1 SESSION WITH "FAST MODE" OPTION
 # ---------------------------------------------
+light_mode = st.sidebar.checkbox("🕹️ Fast Mode (skip telemetry)", value=True)
+
 st.write(f"### Loading {session_type} data for {gp} {year}... ⏳")
 
 try:
-    with st.spinner(f"🔄 Fetching {gp} {session_type} data for {year}... this may take a minute ⏱️"):
-        session = load_f1_session(year, gp, session_type)
-    st.success(f"✅ Loaded {gp} {session_type} ({year}) successfully")
+    if light_mode:
+        with st.spinner(f"⚡ Loading {gp} {session_type} summary (no telemetry)..."):
+            session = fastf1.get_session(year, gp, session_type)
+            # Load only laps + timing info (no car telemetry)
+            session.load(laps=True, telemetry=False)
+        st.success(f"✅ Loaded summary for {gp} {session_type} ({year})")
+    else:
+        with st.spinner(f"🔄 Fetching full telemetry for {gp} {session_type} ({year})... this may take a minute ⏱️"):
+            session = load_f1_session(year, gp, session_type)
+        st.success(f"✅ Loaded full data for {gp} {session_type} ({year})")
 except Exception as e:
     st.error(f"❌ Could not load session data: {e}")
     st.stop()
-
-
+    
 # ---------------------------------------------
 # LAP TIME COMPARISON
 # ---------------------------------------------
