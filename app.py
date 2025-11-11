@@ -156,7 +156,7 @@ fig1 = px.line(
     markers=True,
 )
 fig1.update_layout(xaxis_title="Lap Number", yaxis_title="Lap Time (s)", template="plotly_dark")
-st.plotly_chart(fig1, use_container_width=True)
+st.plotly_chart(fig1, width="stretch")
 
 # ---------------------------------------------
 # TELEMETRY COMPARISON (FASTEST LAP)
@@ -180,7 +180,7 @@ if not telemetry.empty:
         title=f"Speed vs Distance – Fastest Lap ({gp} {year})",
     )
     fig2.update_layout(xaxis_title="Distance (m)", yaxis_title="Speed (km/h)", template="plotly_dark")
-    st.plotly_chart(fig2, use_container_width=True)
+    st.plotly_chart(fig2, width="stretch")
 else:
     st.warning("⚠️ No telemetry data available for selected drivers.")
 
@@ -226,7 +226,7 @@ if len(drivers) == 2:
             template="plotly_dark",
             hovermode="x unified",
         )
-        st.plotly_chart(fig3, use_container_width=True)
+        st.plotly_chart(fig3, width="stretch")
     else:
         st.warning("⚠️ Delta comparison not possible (missing telemetry).")
 else:
