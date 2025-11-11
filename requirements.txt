@@ -3,3 +3,9 @@ pandas
 plotly
 numpy
 fastf1
+streamlit==1.37.0
+fastf1==3.3.0
+plotly==5.20.0
+numpy==1.26.4
+pandas==2.2.1
+matplotlib==3.8.3
